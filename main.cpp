@@ -3,7 +3,7 @@ using namespace std;
 
 int n;
 char seed[1010][30] = {0}; //種
-int que[1010][2][30] = {0}; //種.toInt
+int que[1010][2][30] = {0}; //種.toInt.separate大文字0小文字1
 bool mem[30] = {0}; //trueの場合使ってはいけない
 
 bool judge()
