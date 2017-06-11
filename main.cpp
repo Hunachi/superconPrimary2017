@@ -70,7 +70,7 @@ bool judge()
 vector<int> base,base_;
 vector<int> seed_;
 vector<int> box[30][3];
-int seed_bit[3000] = {0};
+unsigned long long seed_bit[3000] = {0};
 const int INF = 30000;
 map< unsigned long long , int > pattern;
 
@@ -121,47 +121,108 @@ void hunachi() {
     for (int i = 0; i < seed_.size(); ++i) {
         for (int j = 0; j < 26; ++j) {
             if (que[seed_[i]][0][j] || que[seed_[i]][1][j]) {
+                seed_bit[i] = ((seed_bit[i])|(3<<(j*2)));
                 box[j][2].push_back(i);
             } else if (que[seed_[i]][0][j]) {
+                seed_bit[i] = ((seed_bit[i])|(1 << (j * 2)));
                 box[j][0].push_back(i);
             } else if (que[seed_[i]][1][j]) {
+                seed_bit[i] = ((seed_bit[i])|(1 << (j * 2 + 1)));
                 box[j][1].push_back(i);
             }
         }
     }
 }
 
-
-int zentan(){
-
-}
-
-int f_ezn( unsigned long long now , int before ) {
+pair<int,int> f_ezn( unsigned long long now , int before ) {
     bool flag = true;
     int ans = INF;
+    int root = -2;
     for (int i = 0; i < 26; ++i) {
-        bool a = (bool) (now >> (i * 2) & 1);
-        bool b = (bool) (now >> (i * 2 + 1) & 1);
+        bool a = (bool) ((now >> (i * 2)) & 1);
+        bool b = (bool) ((now >> (i * 2 + 1)) & 1);
         if (!a || !b) {
             flag = false;
             break;
         }
     }
     if (flag) {
-        return 0;
+        return make_pair(-1,0);
     }
-    for( int  i = (before + 1); i < seed_.size(); ++i ){
+    int b = f_ezn(now, before + 1).second;
+    for(int  i = (before + 1); i < seed_.size(); ++i ){
         unsigned long long sel_next = (now | seed_bit[i]);
         if(sel_next == now) {
             continue;
         }
-        int a = f_ezn(sel_next, before + 1);
-        int b = f_ezn(now, before + 1);
+        auto che = pattern.find(sel_next);
+        if(pattern.end() == che){
+            continue;
+        }
+        int a = f_ezn(sel_next, before + 1).second;
         ans = min( a , b );
-        pattern[now] = ans;
+        if(ans == a){
+            pattern[now] = ans;
+            root = i;
+        }
     }
+    return make_pair(root,ans);
+}
 
-    return ans;
+void check(int number,int score){
+    int fir = -1;
+    int sec = -1;
+    int sco = score;
+    unsigned long long a = 0,save = 0;
+    for(int i = 0; i < seed_.size(); ++i){
+        auto c = pattern.find(seed_bit[seed_[i]]);
+        if(c == pattern.end()) {
+            continue;
+        }
+        if(pattern[seed_bit[seed_[i]]] == sco){
+            //fir = base[i];
+            printf("%d ",seed_[i]);
+            save = seed_bit[i];
+            break;
+        }
+    }
+    sco--;
+    while(sco>=0) {
+        for (int i = 0; i < seed_.size(); ++i) {
+            a = (save | seed_bit[i]);
+            auto c = pattern.find(seed_bit[seed_[i]]);
+            if (c == pattern.end()) {
+                continue;
+            }
+            if (pattern[a] == sco) {
+                if(sco == (score-1)){
+                    printf("%d",seed_[i]);
+                }else{
+                    printf("%d %d",seed_[i],(score - sco + 1));
+                }
+                for(int j = 0; j < 26 ; j++){
+                    if((save<<(j*2))&1){
+                        printf("%c",(char)('A'+j));
+                    }
+                    if((save<<(j*+1))&1){
+                        printf("%c",(char)('a'+j));
+                    }
+                }
+                //fir = base[i];
+                save = a;
+                break;
+            }
+        }
+        sco--;
+    }
+    return;
+}
+
+void zentan(){
+    int ans[3000] = {0};
+    pair<int,int> a = f_ezn(seed_bit[0], 0);
+    check(a.first,a.second);
+    return;
 }
 
 int main()
@@ -194,5 +255,9 @@ int main()
     {
         printf("YES\n");
     }
+
+    hunachi();
+    zentan();
+
     return 0;
 }
