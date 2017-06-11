@@ -67,6 +67,26 @@ bool judge()
     }
 }
 
+int zentan(){
+    map< long long int , int > pattern;
+}
+
+int f_ezn( long long int now , int before , int use){
+    bool flag = true;
+    for( int i = 0; i < 26 ; ++i ){
+        bool a = (bool) (now >> (i * 2) & 1);
+        bool b = (bool) (now >> (i * 2 + 1) & 1);
+        if( !a || !b ){
+            flag = false;
+            break;
+        }
+    }
+    if(flag){
+        return 0;
+    }
+    //for( int  i = (before + 1); i < )
+}
+
 int main()
 {
     scanf("%d",&n);
