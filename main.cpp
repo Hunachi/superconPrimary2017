@@ -74,31 +74,8 @@ unsigned long long seed_bit[3000] = {0};
 const int INF = 30000;
 map< unsigned long long , int > pattern;
 
-void output( int vec[3000] ){
-    int i = 1;
-    string ans;
-    string a,a_;
-    a = seed[vec[0]];
-    while( vec[i] == -1 ){
-        a_ = seed[vec[i]];
-        for( int i = 0; i < a.size(); ++i ){
-            strcat(ans,a[i]);
-        }
-        for( int i = 0; i < a_.size(); ++i ){
-            strcat(ans,a_[i]);
-        }
-        //kaburikesu sort
-        printf("%d %d %c\n",vec[i-1],vec[i],ans);
-    }
-    if( i > 1 ){
-        printf("%d %d %c\n",n+i,n+i,'!');
-    }else{
-        printf("%d %d %s\n",vec[0],vec[0],a);
-    }
-}
-
 void hunachi() {
-
+    cout << "hunachi" << endl;
     for (int i = 0; i < 26; ++i) {
         if (mem[i] == 0) {
             base.push_back(i);
@@ -109,7 +86,7 @@ void hunachi() {
     for (int i = 0; i < n; ++i) {
         int flag = true;
         for (int j = 0; j < base_.size(); ++j) {
-            if (que[i][0][j] > 0) {
+            if (que[i][0][base_[j]] > 0 || que[i][1][base_[j]] > 0) {
                 flag = false;
             }
         }
@@ -118,9 +95,10 @@ void hunachi() {
         }
     }
 
+    cout << "bit_b" << endl;
     for (int i = 0; i < seed_.size(); ++i) {
         for (int j = 0; j < 26; ++j) {
-            if (que[seed_[i]][0][j] || que[seed_[i]][1][j]) {
+            if (que[seed_[i]][0][j] && que[seed_[i]][1][j]) {
                 seed_bit[i] = ((seed_bit[i])|(3<<(j*2)));
                 box[j][2].push_back(i);
             } else if (que[seed_[i]][0][j]) {
@@ -131,47 +109,72 @@ void hunachi() {
                 box[j][1].push_back(i);
             }
         }
+        //printf("%llu\n",seed_bit[i]);
     }
+    cout << seed_.size()<< "saizu" << endl;
 }
 
-pair<int,int> f_ezn( unsigned long long now , int before ) {
+int f_ezn( unsigned long long now , int before ) {
+
+    cout << "f_zen0" << endl;
+
     bool flag = true;
     int ans = INF;
-    int root = -2;
-    for (int i = 0; i < 26; ++i) {
-        bool a = (bool) ((now >> (i * 2)) & 1);
-        bool b = (bool) ((now >> (i * 2 + 1)) & 1);
-        if (!a || !b) {
-            flag = false;
-            break;
+    if(before > seed_.size()){
+        return INF;
+    }
+    auto c = pattern.find(now);
+    cout << endl << pattern[now] << endl;
+    if(pattern.end() != c){
+        cout << "used = " << now << endl;
+        return pattern[now];
+    }
+
+    cout << "f_zen1" << endl;
+
+    if(now != (unsigned long long)0) {
+        for (int i = 0; i < 26; ++i) {
+            bool a = (bool) ((now >> (i * 2)) & (unsigned long long) 1);
+            bool b = (bool) ((now >> (i * 2 + 1)) & (unsigned long long) 1);
+            cout << a << " " << b << endl;
+            if (a != b) {
+                flag = false;
+                break;
+            }
+            //cout << "f_zen2" << endl;
         }
+    }else{
+        flag = false;
     }
     if (flag) {
-        return make_pair(-1,0);
+        pattern[now] = 1;
+        return 1;
     }
-    int b = f_ezn(now, before + 1).second;
-    for(int  i = (before + 1); i < seed_.size(); ++i ){
+    cout << "f_zen3" << now << endl;
+    int b = INF;//f_ezn(now, before + 1);
+    for(int  i = (before); i < seed_.size(); ++i ){
+        cout << "f_zen4" << endl;
         unsigned long long sel_next = (now | seed_bit[i]);
         if(sel_next == now) {
             continue;
         }
-        auto che = pattern.find(sel_next);
-        if(pattern.end() == che){
-            continue;
-        }
-        int a = f_ezn(sel_next, before + 1).second;
-        ans = min( a , b );
-        if(ans == a){
-            pattern[now] = ans;
-            root = i;
-        }
+        //auto che = pattern.find(sel_next);
+        //if(che != pattern.end()) {
+            int a = f_ezn(sel_next, before + 1);
+            printf("%d\n",i);
+            ans = min(a, b);
+            if (ans == a) {
+                cout << ans << endl;
+                pattern[now] = ans;
+            }
+        //}
     }
-    return make_pair(root,ans);
+    cout << "f_zen5" << endl;
+    return ans;
 }
 
-void check(int number,int score){
-    int fir = -1;
-    int sec = -1;
+void check(int score){
+    cout << "check" << endl;
     int sco = score;
     unsigned long long a = 0,save = 0;
     for(int i = 0; i < seed_.size(); ++i){
@@ -181,13 +184,15 @@ void check(int number,int score){
         }
         if(pattern[seed_bit[seed_[i]]] == sco){
             //fir = base[i];
-            printf("%d ",seed_[i]);
+            if(sco == 1){
+                printf("%d %d !\n",seed_[i],seed_[i]);
+            }
             save = seed_bit[i];
             break;
         }
     }
     sco--;
-    while(sco>=0) {
+    while(sco>0) {
         for (int i = 0; i < seed_.size(); ++i) {
             a = (save | seed_bit[i]);
             auto c = pattern.find(seed_bit[seed_[i]]);
@@ -198,7 +203,7 @@ void check(int number,int score){
                 if(sco == (score-1)){
                     printf("%d",seed_[i]);
                 }else{
-                    printf("%d %d",seed_[i],(score - sco + 1));
+                    printf("%d %d",seed_[i],(n + score - sco));
                 }
                 for(int j = 0; j < 26 ; j++){
                     if((save<<(j*2))&1){
@@ -208,6 +213,7 @@ void check(int number,int score){
                         printf("%c",(char)('a'+j));
                     }
                 }
+                cout << endl;
                 //fir = base[i];
                 save = a;
                 break;
@@ -215,13 +221,19 @@ void check(int number,int score){
         }
         sco--;
     }
+    if(sco > 1)printf("%d %d !\n",n + score,n + score);
     return;
 }
 
 void zentan(){
-    int ans[3000] = {0};
-    pair<int,int> a = f_ezn(seed_bit[0], 0);
-    check(a.first,a.second);
+    cout << "zentan" << endl;
+    int a = f_ezn(0, 0);
+    if(a==INF){
+        cout << "NG" << endl;
+        return;
+    }
+    //cout << a << endl;
+    check(a);
     return;
 }
 
@@ -254,10 +266,13 @@ int main()
     else
     {
         printf("YES\n");
+        hunachi();
+        cout << "go" << endl;
+        zentan();
+        cout << "fin" << endl;
     }
 
-    hunachi();
-    zentan();
+
 
     return 0;
 }
