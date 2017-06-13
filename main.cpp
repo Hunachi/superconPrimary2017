@@ -13,7 +13,10 @@ vector<int> base,base_;
 vector<int> seed_;
 unsigned long long seed_bit[3000] = {0};
 int INF = 30000;
-vector<int> comp[30],big[30],small[30];
+vector<int> big[30],small[30],comp[30];
+vector<pair<int,int>> comp_num[30][2];
+vector<unsigned long long> comp_bit[30][2];
+vector<int> answer;
 
 void hunachi() {
 
@@ -39,27 +42,112 @@ void hunachi() {
 
     for (int i  : seed_)
     {
-        for (int j = 0; j < 26; ++j)
+        for (int j : base)
         {
             if (que[i][0][j] && que[i][1][j]) {
-                seed_bit[i] = ((seed_bit[i])|(3<<(j*2)));
+                seed_bit[i] = ((seed_bit[i])|(3 << (j * 2)));
                 comp[j].push_back(i);
-                big[j].push_back(i);
-                small[j].push_back(i);
             }
             else if (que[i][0][j])
             {
                 seed_bit[i] = ((seed_bit[i])|(1 << (j * 2)));
-                big[j].push_back(i);
             }
             else if (que[i][1][j])
             {
                 seed_bit[i] = ((seed_bit[i])|(1 << (j * 2 + 1)));
-                small[j].push_back(i);
             }
         }
     }
+
+    int count = 0;
+
+    for (int i  : seed_)
+    {
+        for (int j : base)
+        {
+            if (que[i][0][j] && que[i][1][j])
+            {
+                comp_num[j][0].push_back(make_pair(-1,j));
+                big[j].push_back(i);
+                small[j].push_back(i);
+                break;
+            }
+            else if (que[i][0][j])
+            {
+                big[j].push_back(i);
+                break;
+            }
+            else if (que[i][1][j])
+            {
+                small[j].push_back(i);
+                break;
+            }
+        }
+
+    }
     //cout << seed_.size()<< "saizu" << endl;
+}
+
+void prepare(){
+    for(int i : base) {
+        for (int j : big[i]) {
+            unsigned long long a = 0, b = 0;
+            int c = 52;
+            int s = 0;
+            if (!small[i].empty())s = small[i][0];
+            for (int k : small[i]) {
+                for (int l : base) {
+                    if (que[k][0][l] && que[k][1][l]) {
+                    } else if (que[k][0][l]) {
+                        a = ((seed_bit[k]) | (1 << (j * 2)));
+                    } else if (que[k][1][j]) {
+                        a = ((seed_bit[k]) | (1 << (j * 2 + 1)));
+                    }
+                }
+                b = (seed_bit[j] | a);
+                b -= seed_bit[j];
+                int o = 0;
+                for (int l = 0; l < 52; ++l) {
+                    if ((b >> l) & 1) {
+                        o++;
+                    }
+                }
+                if (o < c) {
+                    c = o;
+                    s = k;
+                    comp_bit[i][1].push_back((seed_bit[j] | seed_bit[o]));
+                }
+            }
+            comp_num[i][1].push_back(make_pair(j, s));
+        }
+    }
+    /*
+    for(int i : base){
+        cout << i <<" : "<< endl;
+        cout << "comp 1 = " ;
+        for(pair<int,int> j : comp_num[i][0]){
+            cout << j.second<< " ";
+        }
+        cout << endl << "comp 2 = ";
+        for(pair<int,int> j : comp_num[i][1]){
+            cout << j.first << "." << j.second << " ";
+        }
+        cout << endl << "big = ";
+        for(int j : big[i]){
+            cout << j << " ";
+        }
+        cout << endl << "small = ";
+        for(int j : small[i]){
+            cout << j << " ";
+        }
+        cout << endl;
+    }*/
+}
+
+void narahara(){
+    for(int i : base){
+
+    }
 }
 
 bool judge()
@@ -152,6 +240,7 @@ int main()
     {
         printf("YES\n");
         hunachi();
+        prepare();
     }
     return 0;
 }
