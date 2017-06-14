@@ -137,7 +137,6 @@ void hunachi() {
             }
             if (!small[i].empty()) {
                 comp[i].push_back(make_pair((j.first | seed_bit[s]),make_pair(j.second,s)));
-                //TODO
             }
         }
     }
@@ -233,206 +232,37 @@ int fun(){
         }
 
     }
-    unsigned long long ans_bit = 0;
-    cout << ans << endl;
+    unsigned long long ans_bit = 0,ans_bit_0 = 0;
     for(int b : answer_0){
         ans_bit = (ans_bit | seed_bit[b]);
-        cout << b << " ";
-        out(seed_bit[b]);
+        //cout << b << " ";
+        //out(seed_bit[b]);
     }
-    cout << " check = " << check(ans_bit) << endl;
-}
-
-/*
-    for(int i : base){
-        cout << i <<" : "<< endl;
-        cout << "comp 1 = " ;
-        for(pair<int,int> j : comp_num[i][0]){
-            cout << j.second<< " ";
+    if(check(ans_bit)) {
+        cout << ans << endl;
+        if (answer_0.size() == 1) {
+            cout << answer_0[0] + 1 << " " << answer_0[0] + 1 << " !" << endl;
+            return 1;
         }
-        cout << endl << "comp 2 = ";
-        for(pair<int,int> j : comp_num[i][1]){
-            cout << j.first << "." << j.second << " ";
-        }
-        cout << endl << "big = ";
-        for(int j : big[i]){
-            cout << j << " ";
-        }
-        cout << endl << "small = ";
-        for(int j : small[i]){
-            cout << j << " ";
-        }
-        cout << endl;
-    }
-}*/
-
-
-/*
-void mya(){
-    int ans = seed_.size();
-    set<int> a;
-    for(int i = 0; i < base.size(); i++)
-    {
-        int p = base[i];
-        int num = 0;
-        if(comp_num[p][num].empty())num++;
-        int ans_;
-        //cout << "i " << p << endl;
-        for(int h = num ; h < 2; h++ )
-        {
-            //cout << "h " << h << endl;
-            int count = 0;
-            for (unsigned long long j : comp_bit[p][h])
-            {
-                answer.push_back(p);
-                //cout << j << " = j"<< endl;
-                ans_= h + 1;
-                if(ans_ == 2)
-                {
-                    //cout << p << " ans = " << count <<endl;
-                    if(comp_num[p][h].size() <= count){
-                        continue;
-                    }
-                    //cout << comp_num[p][h][count].first << " " << comp_num[p][h][count].second<< " ";
-                    answer.push_back(comp_num[p][h][count].second);
-                    answer.push_back(comp_num[p][h][count].first);
-                }
-                else
-                {
-                    answer.push_back(comp_num[p][h][count].second);
-                }
-                for (int k : base)
-                {
-                    bool b = (bool) (j >> (k * 2) & 1);
-                    bool c = (bool) (j >> (k * 2 + 1) & 1);
-                    if (c != b)
-                    {
-                        if (b)
-                        {
-                            a.insert(k * 2);
-                        }
-                        if (c)
-                        {
-                            a.insert(k * 2 + 1);
-                        }
-                    }
-                }
-                unsigned long long p1 = j;
-
-                bool flags = true;
-                ///cout << a.size() << " = a.size()" << endl;
-                while (!a.empty() && flags)
-                {
-                    ans_++;
-                    auto kk = a.begin();
-                    int k = *kk;
-                    //cout << " k " << k << endl;
-                    a.erase(k);
-                    int c = k / 2;
-                    int saisho = 52;
-                    int ans_nu = -1;
-                    //cout << "front of k = " ;
-                    if ((k % 2) == 1)
-                    {
-                        //cout << "big" << c <<endl;
-                        for (int l : big[c])
-                        {
-                            unsigned long long p2 = (p1 | seed_bit[l]);
-                            p2 = (p2 - p1);
-                            int o = __builtin_popcount(p2);
-                            //cout << o << endl;
-                            if (o < saisho)
-                            {
-                                //cout << o << " o " << endl;
-                                saisho = o;
-                                ans_nu = l;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        for (int l : small[c])
-                        {
-                            unsigned long long p2 = (p1 | seed_bit[l]);
-                            p2 = p2 - p1;
-                            int o = __builtin_popcount(p2);
-                            if (o < saisho)
-                            {
-
-                                //cout << " o " << o << endl;
-                                saisho = o;
-                                ans_nu = l;
-                            }
-                        }
-                    }
-                    if(ans_nu == -1)
-                    {
-                        //存在しない
-                        //cout << "NG" << c << endl;
-                        flags = false;
-                        a.clear();
-                    }
-                    unsigned long long p3,p4;
-                    p3 = (seed_bit[ans_nu] | p1);
-                    p4 = p3;
-                    answer.push_back(ans_nu);
-                    p3 = p3 - p1;
-                    for (int z : base)
-                    {
-                        if ((p3 >> (z * 2)) & 1)
-                        {
-                            bool aa = (bool)a.erase(z * 2);
-                            if(!aa){
-                                a.insert(z * 2);
-                            }
-                        }
-                        if ((p3 >> (z * 2 + 1)) & 1)
-                        {
-                            bool aa = (bool)a.erase(z * 2 + 1);
-                            if(!aa){
-                                a.insert(z * 2 + 1);
-                            }
-                        }
-                    }
-                    //cout << ans_nu << endl;
-                    p1 = p4;
-                }
-                if(ans_ <= ans && flags)
-                {
-                    ans = ans_;
-                    copy(answer.begin(),answer.end(),back_inserter(answer2));
-                }
-                for(int o : answer){
-                    cout << o << " ";
-                }
-                cout << endl;
-                answer.clear();
-                a.clear();
-                count++;
+        int count = -1;
+        for(int b : answer_0){
+            ans_bit_0 = (ans_bit_0 | seed_bit[b]);
+            if(count == -1){
+                cout << b + 1<< " ";
+            }else if(count == 0){
+                cout << b + 1<< " ";
+                out((seed_bit[b] | seed_bit[answer_0[0]]));
+            }else{
+                cout << b + 1 << " " << n + count << " ";
+                out(ans_bit_0);
             }
+            count++;
         }
+        cout << n + count << " " << n + count << " !" << endl;
     }
-    cout << "m = " << ans << endl;
-    unsigned long long j = 0;
-    for(int i : answer2){
-        //cout << i << " " ;
-        out(seed_bit[i]);
-        j = (j | seed_bit[i]);
-    }
-    for(int i = 0; i < 26; i++){
-        if((j >> (i * 2))&1){
-            cout << "1 ";
-        }else{
-            cout << "0 ";
-        }
-        if((j >> (i * 2 + 1))&1){
-            cout << "1" << endl;
-        }else{
-            cout << "0" << endl;
-        }
-    }
+    return ans;
+    //cout << " check = " << check(ans_bit) << endl;
 }
-*/
 
 bool judge()
 {
