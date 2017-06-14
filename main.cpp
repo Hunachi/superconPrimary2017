@@ -17,6 +17,36 @@ vector<int> big[30],small[30],comp[30];
 vector<pair<int,int>> comp_num[30][2];
 vector<unsigned long long> comp_bit[30][2];
 vector<int> answer,answer2;
+map<unsigned long long, int> save;
+
+void out(unsigned long long j){
+    char c;
+    for(int k : base){
+        if((j >> (k * 2)) & 1){
+            c = (char)('A' + k);
+            cout << c;
+        }
+        if((j >> (k * 2 + 1)) & 1){
+            c = (char)('a' + k);
+            cout << c;
+        }
+    }
+    cout << endl;
+    return;
+}
+
+bool check(unsigned long long j){
+    for(int k : base)
+    {
+        bool b = (bool)(j >> (k * 2) & 1);
+        bool c = (bool)(j >> (k * 2 + 1)& 1);
+        if(c != b)
+        {
+            return false;
+        }
+    }
+    return true;
+}
 
 void hunachi() {
 
@@ -120,9 +150,22 @@ void prepare(){
             if(!small[i].empty()){
                 comp_bit[i][1].push_back((seed_bit[j] | seed_bit[s]));
                 comp_num[i][1].push_back(make_pair(j, s));
+                //TODO
+                //cout << j << " " << s << endl;
+                //out(comp_bit[i][1][comp_bit[i][1].size()-1]);
             }
         }
     }
+
+    int fun(){
+        for(int i : base){
+            //TODO 1
+            int ans_0 = INF;
+
+            //TODO 2
+        }
+    }
+
 /*
     for(int i : base){
         cout << i <<" : "<< endl;
@@ -146,35 +189,8 @@ void prepare(){
     }*/
 }
 
-void out(unsigned long long j){
-    char c;
-    for(int k : base){
-        if((j >> (k * 2)) & 1){
-           c = (char)('A' + k);
-            cout << c;
-        }
-        if((j >> (k * 2 + 1)) & 1){
-            c = (char)('a' + k);
-            cout << c;
-        }
-    }
-    cout << endl;
-    return;
-}
 
-bool check(unsigned long long j){
-    for(int k : base)
-    {
-        bool b = (bool)(j >> (k * 2) & 1);
-        bool c = (bool)(j >> (k * 2 + 1)& 1);
-        if(c != b)
-        {
-            return false;
-        }
-    }
-    return true;
-}
-
+/*
 void mya(){
     int ans = seed_.size();
     set<int> a;
@@ -279,27 +295,6 @@ void mya(){
                         flags = false;
                         a.clear();
                     }
-                    /*bool fla = false;
-                    if(ans_nu.second == -1) {
-                        for (int r = 0; r < 2; r++) {
-                            for (int l = 0; l < comp_bit[i][r].size(); l++) {
-                                if ((l >> k) & 1) {
-                                    unsigned long long p2 = (p1 | l);
-                                    p2 = p2 - p1;
-                                    int o = __builtin_popcount(p2);
-                                    if (o < saisho) {
-                                        if (r == 1) {
-                                            fla = true;
-                                        } else {
-                                            fla = false;
-                                        }
-                                        saisho = o;
-                                        ans_nu = comp_num[i][r][l];
-                                    }
-                                }
-                            }
-                        }
-                    }*/
                     unsigned long long p3,p4;
                     p3 = (seed_bit[ans_nu] | p1);
                     p4 = p3;
@@ -360,6 +355,7 @@ void mya(){
         }
     }
 }
+*/
 
 bool judge()
 {
@@ -452,7 +448,7 @@ int main()
         printf("YES\n");
         hunachi();
         prepare();
-        mya();
+        //mya();
     }
     return 0;
 }
