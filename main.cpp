@@ -15,10 +15,6 @@ unsigned long long seed_bit[3000] = {0};
 int INF = 30000;
 vector<pair<unsigned long long,int>> big[30],small[30];
 vector<pair<unsigned long long ,pair<int,int>>> comp[30];
-//vector<unsigned long long> comp_bit[30][2];
-vector<int> answer,answer2;
-int ans = INF;
-map<unsigned long long, int> save;
 
 void out(unsigned long long j){
     char c;
