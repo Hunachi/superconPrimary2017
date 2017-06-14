@@ -13,10 +13,11 @@ vector<int> base,base_;
 vector<int> seed_;
 unsigned long long seed_bit[3000] = {0};
 int INF = 30000;
-vector<int> big[30],small[30],comp[30];
-vector<pair<int,int>> comp_num[30][2];
-vector<unsigned long long> comp_bit[30][2];
+vector<pair<unsigned long long,int>> big[30],small[30];
+vector<pair<unsigned long long ,pair<int,int>>> comp[30];
+//vector<unsigned long long> comp_bit[30][2];
 vector<int> answer,answer2;
+int ans = INF;
 map<unsigned long long, int> save;
 
 void out(unsigned long long j){
@@ -75,8 +76,9 @@ void hunachi() {
         for (int j : base)
         {
             if (que[i][0][j] && que[i][1][j]) {
-                seed_bit[i] = ((seed_bit[i])|(3 << (j * 2)));
-                comp[j].push_back(i);
+                seed_bit[i] = ((seed_bit[i])|(1 << (j * 2)));
+                seed_bit[i] = ((seed_bit[i])|(1 << (j * 2 + 1)));
+                //comp[j].push_back(i);
             }
             else if (que[i][0][j])
             {
@@ -87,55 +89,41 @@ void hunachi() {
                 seed_bit[i] = ((seed_bit[i])|(1 << (j * 2 + 1)));
             }
         }
-    }
-
-    int count = 0;
-
-    for (int i  : seed_)
-    {
-        for (int j : base)
-        {
+        for (int j : base) {
             if (que[i][0][j] && que[i][1][j])
             {
-                comp_num[j][0].push_back(make_pair(-1,j));
-                big[j].push_back(i);
-                small[j].push_back(i);
-                //break;
+                comp[j].push_back(make_pair(seed_bit[i],make_pair(i,-1)));
+                big[j].push_back(make_pair(seed_bit[i],i));
+                small[j].push_back(make_pair(seed_bit[i],i));
             }
             else if (que[i][0][j])
             {
-                big[j].push_back(i);
-                //break;
+                big[j].push_back(make_pair(seed_bit[i],i));
             }
             else if (que[i][1][j])
             {
-                small[j].push_back(i);
-                //break;
+                small[j].push_back(make_pair(seed_bit[i],i));
             }
         }
-
     }
-    //cout << seed_.size()<< "saizu" << endl;
-}
 
-void prepare(){
     for(int i : base) {
-        for (int j : big[i]) {
+        for (pair<unsigned long long,int> j : big[i]) {
             unsigned long long a = 0, b = 0;
             int c = 52;
             int s = 0;
-            if (!small[i].empty())s = small[i][0];
-            for (int k : small[i]) {
-                for (int l : base) {
-                    if (que[k][0][l] && que[k][1][l]) {
+            //if (!small[i].empty())s = small[i][0];
+            for (pair<unsigned long long , int> k : small[i]) {
+                /*for (int l : base) {
+                    if (que[k.second][0][l] && que[k.second][1][l]) {
                     } else if (que[k][0][l]) {
-                        a = ((seed_bit[k]) | (1 << (j * 2)));
+                        a = ((k.first) | (1 << (j * 2)));
                     } else if (que[k][1][j]) {
                         a = ((seed_bit[k]) | (1 << (j * 2 + 1)));
                     }
-                }
-                b = (seed_bit[j] | a);
-                b -= seed_bit[j];
+                }*/
+                b = (j.first | k.first);
+                b -= j.first;
                 int o = 0;
                 for (int l = 0; l < 52; ++l) {
                     if ((b >> l) & 1) {
@@ -144,27 +132,116 @@ void prepare(){
                 }
                 if (o > 0 && o < c) {
                     c = o;
-                    s = k;
+                    s = k.second;
                 }
             }
-            if(!small[i].empty()){
-                comp_bit[i][1].push_back((seed_bit[j] | seed_bit[s]));
-                comp_num[i][1].push_back(make_pair(j, s));
+            if (!small[i].empty()) {
+                comp[i].push_back(make_pair((j.first | seed_bit[s]),make_pair(j.second,s)));
                 //TODO
-                //cout << j << " " << s << endl;
-                //out(comp_bit[i][1][comp_bit[i][1].size()-1]);
             }
         }
     }
 
-    int fun(){
-        for(int i : base){
-            //TODO 1
-            int ans_0 = INF;
+    //cout << seed_.size()<< "saizu" << endl;
+}
 
-            //TODO 2
+
+int fun(){
+    int ans = INF;
+    vector<int> answer_0;
+    for(int i : base){
+        for(pair<unsigned long long ,pair<int,int>> j : comp[i]){
+            int ans_1 = INF;
+            vector<int> answer_1;
+            if(j.second.second == -1){
+                ans_1 = 1;
+                answer_1.push_back(j.second.first);
+            }else{
+                ans_1 = 2;
+                answer_1.push_back(j.second.first);
+                answer_1.push_back(j.second.second);
+            }
+            unsigned long long bit_2 = j.first;
+            set<pair<int,int>> a;
+            for(int k : base){
+                if(((bit_2 >> (k * 2))& 1) && ((bit_2 >> (k * 2 + 1))& 1) )continue;
+                if(((bit_2 >> (k * 2))& 1) ){
+                    a.insert(make_pair(k , 0));
+                }else if(((bit_2 >> (k * 2 + 1))& 1) ){
+                    a.insert(make_pair(k, 1));
+                }
+            }
+
+            while(!a.empty()){
+                auto it = a.begin();
+                pair<int,int> k = *it;
+                //cout << k.first << " a " ;
+                a.erase(make_pair(k.first,k.second));
+                int seed_num = 0;
+                pair<unsigned long long ,int> b;
+                if(k.second == 1){
+                    b = big[k.first][0];
+                    seed_num = b.second;
+                }else if(k.second == 0){
+                    //small
+                    b = small[k.first][0];
+                    seed_num = b.second;
+                }
+                //b  = comp[k.first][0];
+                answer_1.push_back(seed_num);
+                unsigned long long bit_3 = ( b.first | bit_2) ;
+                bit_3 = bit_3 - bit_2;
+                if(bit_3 == (unsigned long long)0){
+                    break;
+                }
+                //cout << "out" << endl;
+                //out(bit_3);
+
+                for(int l : base){
+                    if( l == k.first )continue;
+                    if(((bit_3 >> (l * 2))& 1) && ((bit_3 >> (l * 2 + 1))& 1) ){
+                        a.erase(make_pair(l , 0));
+                        a.erase(make_pair(l , 1));
+                        //continue;
+                    }else{
+                    if(((bit_3 >> (l * 2))& 1) ){
+                        int p = a.erase(make_pair(l , 1));
+                        if( !p ){
+                            a.insert(make_pair(l , 0));
+                        }
+                    }else if(((bit_3 >> (l * 2 + 1))& 1) ){
+                        int p = a.erase(make_pair(l , 0));
+                        if( !p ){
+                            a.insert(make_pair(l, 1));
+                        }
+                    }
+                    }
+                }
+                bit_2 = (b.first | bit_2);
+            }
+
+            //answer_1.pop_back();
+            //cout << ans << " " << (answer_1.size()) << endl;
+            if(ans > (answer_1.size())){
+                //cout << ans << " " << (answer_1.size()) << endl;
+                ans = answer_1.size();
+                answer_0.clear();
+                copy(answer_1.begin(),answer_1.end(),back_inserter(answer_0));
+            }
+            answer_1.clear();
+
         }
+
     }
+    unsigned long long ans_bit = 0;
+    cout << ans << endl;
+    for(int b : answer_0){
+        ans_bit = (ans_bit | seed_bit[b]);
+        cout << b << " ";
+        out(seed_bit[b]);
+    }
+    cout << " check = " << check(ans_bit) << endl;
+}
 
 /*
     for(int i : base){
@@ -186,8 +263,8 @@ void prepare(){
             cout << j << " ";
         }
         cout << endl;
-    }*/
-}
+    }
+}*/
 
 
 /*
@@ -447,8 +524,7 @@ int main()
     {
         printf("YES\n");
         hunachi();
-        prepare();
-        //mya();
+        fun();
     }
     return 0;
 }
